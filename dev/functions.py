@@ -1,4 +1,8 @@
-import constants as cnst, pygame
+import constants as cnst
+import pygame, sys
+import numpy as np
+
+pygame.init()
 
 
 def create_screen() -> pygame.Surface:
@@ -116,3 +120,49 @@ def restart(screen: pygame.Surface) -> None:
     screen.fill(cnst.BACKGROUND_DARK)
     grid(screen) 
     reset_board()
+
+def run():
+    # Initialize variables
+    cnst.BOARD = np.zeros((cnst.BOARD_ROWS, cnst.BOARD_COLS))
+    cnst.SCREEN = create_screen()
+
+    player = 2 
+    gameover = False
+
+    # Main loop
+    while True:
+
+        for event in pygame.event.get():
+
+            if event.type == pygame.QUIT:
+                sys.exit()
+
+            if event.type == pygame.MOUSEBUTTONDOWN and not gameover:
+                mouseX = event.pos[0]
+                mouseY = event.pos[1]
+
+                clicked_row = int(mouseY // 200) # rounding up/down numbers
+                clicked_col = int(mouseX // 200)
+
+                if available_square(clicked_row, clicked_col):
+                    if player == 1:
+                        mark_square(clicked_row, clicked_col, 1)
+                        if check_result(player):
+                            gameover = True
+                        player = 2
+
+                    elif player == 2:
+                        mark_square(clicked_row, clicked_col, 2)
+                        if check_result(player):
+                            gameover = True
+                        player = 1
+                    
+                    draw_figures(cnst.SCREEN)
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_r:
+                    gameover = False
+                    player = 2
+                    restart(cnst.SCREEN)
+
+        pygame.display.update()
